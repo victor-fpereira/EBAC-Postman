@@ -1,0 +1,523 @@
+{
+	"info": {
+		"_postman_id": "4e9c3d20-6801-49ad-b25b-42a894b36ed1",
+		"name": "EBAC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19739025"
+	},
+	"item": [
+		{
+			"name": "POST - Teste positivo",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var nome_usuario = pm.variables.replaceIn(\"{{$randomUserName}}\")\r",
+							"pm.globals.set(\"nome_usuario\", nome_usuario)\r",
+							"pm.globals.set(\"email\", `${nome_usuario}_${Date.now()}@qa.com.br`)\r",
+							"\r",
+							"pm.sendRequest({\r",
+							"    url: \"http://localhost:3000/usuarios\",\r",
+							"    method: \"GET\",\r",
+							"    header: {\r",
+							"        \"content-type\": \"application/json\",\r",
+							"        \"accept\": \"application/json\"\r",
+							"    },\r",
+							"    body: {}\r",
+							"}, function (err, res) {\r",
+							"    let response = res.json()\r",
+							"    let qtd_usuarios = response.quantidade\r",
+							"    pm.globals.set('quantidade_usuarios_cadastrados', qtd_usuarios)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"    if (pm.response.code == 201) {\r",
+							"        var qtd_usuarios = pm.globals.get('quantidade_usuarios_cadastrados')\r",
+							"        pm.globals.set('quantidade_usuarios_cadastrados', (qtd_usuarios + 1))\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Json response deve conter a mensagem 'Cadastro realizado com sucesso'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include('Cadastro realizado com sucesso');\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"{{nome_usuario}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"administrador\": \"false\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST - Teste negativo",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Json response deve conter a mensagem 'Este email já está sendo usado'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include('Este email já está sendo usado');\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"{{nome_usuario}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"administrador\": \"false\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET - Teste positivo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"A quantidade de usuários cadastrados é correta\", function () {\r",
+							"    var qtd_usuarios = pm.globals.get('quantidade_usuarios_cadastrados')\r",
+							"    var qtd_usuarios2 = pm.response.json().quantidade\r",
+							"    pm.expect(parseInt(qtd_usuarios)).to.be.equal(qtd_usuarios2)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "javascript"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET - Teste negativo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code não é 201\", function () {\r",
+							"    pm.response.to.not.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"A quantidade de usuários cadastrados não é zero\", function () {\r",
+							"    var qtd_usuarios = pm.globals.get('quantidade_usuarios_cadastrados')\r",
+							"    pm.expect(parseInt(qtd_usuarios)).to.not.be.equal(0)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT - Teste positivo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Json response deve conter a mensagem 'Registro alterado com sucesso'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include('Registro alterado com sucesso');\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: \"http://localhost:3000/usuarios\",\r",
+							"    method: \"GET\",\r",
+							"    header: {\r",
+							"        \"content-type\": \"application/json\",\r",
+							"        \"accept\": \"application/json\"\r",
+							"    },\r",
+							"    body: {}\r",
+							"}, function (err, res) {\r",
+							"    let response = res.json()\r",
+							"    let qtd_usuarios = response.quantidade\r",
+							"\r",
+							"    // Configura um número aleatório de 1 até o máximo de usuários cadastrados\r",
+							"    // para atualizar um usuário qualquer da lista\r",
+							"    let index = Math.floor(Math.random() * qtd_usuarios)\r",
+							"\r",
+							"    // Pega o id desse usuario\r",
+							"    pm.globals.set('user_id', response.usuarios[index]._id)\r",
+							"\r",
+							"    // Muda o email do usuario\r",
+							"    let nome_usuario = pm.globals.get(\"nome_usuario\")\r",
+							"    pm.globals.set(\"email\", `${nome_usuario}_${Date.now()}@qa.com.br`)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"{{nome_usuario}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"administrador\": \"false\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios/{{user_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT - Teste negativo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Json response deve conter a mensagem 'Este email já está sendo usado'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include('Este email já está sendo usado');\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: \"http://localhost:3000/usuarios\",\r",
+							"    method: \"GET\",\r",
+							"    header: {\r",
+							"        \"content-type\": \"application/json\",\r",
+							"        \"accept\": \"application/json\"\r",
+							"    },\r",
+							"    body: {}\r",
+							"}, function (err, res) {\r",
+							"    let response = res.json()\r",
+							"    let qtd_usuarios = response.quantidade\r",
+							"\r",
+							"    // Configura um número aleatório de 1 até o máximo de usuários cadastrados\r",
+							"    // para atualizar um usuário qualquer da lista\r",
+							"    let index = Math.floor(Math.random() * qtd_usuarios)\r",
+							"\r",
+							"    // Pega o id desse usuario\r",
+							"    pm.globals.set('user_id', response.usuarios[index]._id)\r",
+							"\r",
+							"    // Pega o email do usuario para atualizar o cadastro usando o mesmo e-mail\r",
+							"    // já cadastrado\r",
+							"    let nome_usuario = pm.globals.get(\"nome_usuario\")\r",
+							"    let email = pm.globals.get(\"email\")\r",
+							"    pm.globals.set('email', email)\r",
+							"\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"{{nome_usuario}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"administrador\": \"false\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios/{{user_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT - Teste positivo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"        if (pm.response.code == 200) {\r",
+							"        var qtd_usuarios = pm.globals.get('quantidade_usuarios_cadastrados')\r",
+							"        pm.globals.set('quantidade_usuarios_cadastrados', (qtd_usuarios - 1))\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Json response deve conter a mensagem 'Registro excluído com sucesso'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include('Registro excluído com sucesso');\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: \"http://localhost:3000/usuarios\",\r",
+							"    method: \"GET\",\r",
+							"    header: {\r",
+							"        \"content-type\": \"application/json\",\r",
+							"        \"accept\": \"application/json\"\r",
+							"    },\r",
+							"    body: {}\r",
+							"}, function (err, res) {\r",
+							"    let response = res.json()\r",
+							"    let qtd_usuarios = response.quantidade\r",
+							"\r",
+							"    // Configura um número aleatório de 1 até o máximo de usuários cadastrados\r",
+							"    // para atualizar um usuário qualquer da lista\r",
+							"    let index = Math.floor(Math.random() * qtd_usuarios)\r",
+							"\r",
+							"    // Pega o id desse usuario\r",
+							"    pm.globals.set('user_id', response.usuarios[index]._id)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios/{{user_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT - Teste negativo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Json response deve conter a mensagem 'Nenhum registro excluído'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include('Nenhum registro excluído');\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"0"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
